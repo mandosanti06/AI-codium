@@ -1,0 +1,101 @@
+name: AI-ready implementation task
+description: Define one independently testable issue that a new AI session can execute and resume.
+title: "[M#] "
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective and user value
+      description: State one observable outcome and why it matters.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: Separate included and excluded behavior.
+      value: |
+        ## Included
+        -
+
+        ## Excluded
+        -
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and prerequisites
+      description: Link blocking issues, approved designs, ADRs, credentials, and baseline requirements. Write None when empty.
+    validations:
+      required: true
+  - type: dropdown
+    id: readiness
+    attributes:
+      label: Readiness
+      options:
+        - AI Ready
+        - Research
+        - Human Decision
+        - Blocked
+    validations:
+      required: true
+  - type: textarea
+    id: interfaces
+    attributes:
+      label: Interfaces and expected files
+      description: List interfaces consumed and produced plus exact files, or bounded discovery instructions for a spike.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Ordered implementation steps
+      description: Use a dependency-safe checklist with a test or evidence step before implementation.
+      value: |
+        - [ ] Establish or reproduce the baseline.
+        - [ ] Add a failing test or bounded research fixture.
+        - [ ] Implement the smallest complete change.
+        - [ ] Run focused and regression verification.
+        - [ ] Update documentation, ADRs, and handoff evidence.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List objectively verifiable completion conditions.
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification commands and expected results
+      description: Provide exact commands and expected exit status or output. Research spikes must specify their committed artifact.
+    validations:
+      required: true
+  - type: textarea
+    id: security
+    attributes:
+      label: Security, licensing, and upstream impact
+      description: Address credentials, data exposure, destructive actions, provider terms, dependencies, and patch conflicts.
+    validations:
+      required: true
+  - type: textarea
+    id: recovery
+    attributes:
+      label: Recovery guidance
+      description: Explain likely failures, safe retry or rollback, and when a human decision is required.
+    validations:
+      required: true
+  - type: checkboxes
+    id: continuity
+    attributes:
+      label: Continuity contract
+      options:
+        - label: One issue maps to one branch and one draft pull request.
+          required: true
+        - label: Progress will be checkpointed in commits and the PR verification record.
+          required: true
+        - label: A structured handoff will be posted before pause, block, or transfer.
+          required: true
