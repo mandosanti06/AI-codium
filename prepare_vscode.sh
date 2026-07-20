@@ -145,6 +145,71 @@ cat product.json
 # include common functions
 . ../utils.sh
 
+# AICODIUM_PIPELINE_FUNCTIONS_BEGIN
+apply_aicodium_patches() {
+  local category file
+  local LC_ALL=C
+  local -a categories=(product platform workbench)
+
+  for category in "${categories[@]}"; do
+    for file in "../patches/aicodium/${category}/"*.json; do
+      if [[ -f "${file}" ]]; then
+        apply_actions "${file}" || return
+      fi
+    done
+
+    for file in "../patches/aicodium/${category}/"*.patch; do
+      if [[ -f "${file}" ]]; then
+        apply_patch "${file}" || return
+      fi
+    done
+  done
+}
+
+copy_aicodium_source() {
+  local source_relative=$1
+  local destination_relative=$2
+  local prepared_root source_root destination_parent destination_root
+
+  prepared_root=$(pwd -P)
+  source_root="${prepared_root}/../${source_relative}"
+  if [[ ! -d "${source_root}" ]]; then
+    return 0
+  fi
+
+  destination_parent=$(dirname "${destination_relative}")
+  destination_parent=$(cd "${destination_parent}" && pwd -P) || return
+  case "${destination_parent}/" in
+    "${prepared_root}/"*) ;;
+    *)
+      echo "AI-Codium source destination parent escapes prepared vscode: ${destination_relative}" >&2
+      return 1
+      ;;
+  esac
+
+  mkdir -p "${destination_relative}" || return
+  destination_root=$(cd "${destination_relative}" && pwd -P) || return
+  case "${destination_root}/" in
+    "${prepared_root}/"*) ;;
+    *)
+      echo "AI-Codium source destination escapes prepared vscode: ${destination_relative}" >&2
+      return 1
+      ;;
+  esac
+
+  cp -Rp "${source_root}/." "${destination_root}/" || return
+}
+
+copy_aicodium_sources() {
+  copy_aicodium_source \
+    "src/aicodium-runtime/vscode" \
+    "src/vs/platform/aicodiumRuntime" || return
+  copy_aicodium_source \
+    "src/aicodium-extension/vscode" \
+    "extensions/aicodium" || return
+}
+# AICODIUM_PIPELINE_FUNCTIONS_END
+
 # {{{ apply patches
 
 echo "APP_NAME=\"${APP_NAME}\""
@@ -193,7 +258,18 @@ for file in ../patches/user/*.patch; do
     apply_patch "${file}"
   fi
 done
+
+# AICODIUM_PIPELINE_BEGIN
+# Upstream actions and patches above always run before product, platform, and
+# workbench AI-Codium categories.
+apply_aicodium_patches
+# AICODIUM_PIPELINE_END
 # }}}
+
+# AICODIUM_SOURCE_COPY_BEGIN
+# Repository README files sit outside each explicit vscode/ payload boundary.
+copy_aicodium_sources
+# AICODIUM_SOURCE_COPY_END
 
 set -x
 
