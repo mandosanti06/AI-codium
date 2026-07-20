@@ -166,6 +166,15 @@ To go further, you should look at how we build it:
 - macOS: https://github.com/VSCodium/vscodium/blob/master/.github/workflows/stable-macos.yml
 - Windows: https://github.com/VSCodium/vscodium/blob/master/.github/workflows/stable-windows.yml
 
+For the AI-Codium stable macOS baseline, use the CI build command:
+
+```bash
+./build.sh
+```
+
+The complete local and GitHub Actions reproduction procedure, pinned revisions, expected
+artifacts, and recovery actions are in [the macOS baseline guide](build/macos-baseline.md).
+
 The `./dev/build.sh` script is for development purpose and must be avoided for a packaging purpose.
 
 ## <a id="build-snap"></a>Build Snap
