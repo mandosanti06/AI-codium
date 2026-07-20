@@ -18,8 +18,16 @@ on:
   pull_request:
     branches:
       - "**"
-    paths-ignore:
-      - "**/*.md"
+    paths:
+      - '.github/workflows/ci-build-macos.yml'
+      - '.nvmrc'
+      - '**/*.sh'
+      - 'build/**'
+      - 'patches/**'
+      - 'product.json'
+      - 'src/aicodium-runtime/**'
+      - 'src/aicodium-extension/**'
+      - 'upstream/stable.json'
 
 env:
   APP_NAME: VSCodium
@@ -34,6 +42,7 @@ permissions: {}
 
 jobs:
   build:
+    name: macOS ${{ matrix.vscode_arch }} baseline
     runs-on: ${{ matrix.runner }}
     env:
       VSCODE_ARCH: ${{ matrix.vscode_arch }}
@@ -68,23 +77,22 @@ jobs:
           python-version: '3.11'
         if: env.VSCODE_ARCH == 'x64'
 
-      - name: Clone VSCode repo
+      - name: Clone Code OSS source
         run: . get_repo.sh
 
-      - name: Build
+      - name: Build macOS ${{ matrix.vscode_arch }} baseline
         env:
           SHOULD_BUILD: yes
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./build.sh
 
-      - name: Prepare assets
+      - name: Prepare unsigned macOS ${{ matrix.vscode_arch }} baseline artifacts
         run: ./prepare_assets.sh
-        if: env.SHOULD_BUILD == 'yes' && github.event.inputs.generate_assets == 'true'
+        if: github.event_name == 'pull_request' || github.event.inputs.generate_assets == 'true'
 
-      - name: Upload assets
+      - name: Upload macOS ${{ matrix.vscode_arch }} baseline artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: bin-${{ matrix.vscode_arch }}
           path: assets/
           retention-days: 3
-        if: env.SHOULD_BUILD == 'yes' && github.event.inputs.generate_assets == 'true'
+        if: github.event_name == 'pull_request' || github.event.inputs.generate_assets == 'true'
