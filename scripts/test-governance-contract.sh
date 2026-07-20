@@ -20,6 +20,13 @@ require 'Session handoff' AGENTS.md
 require 'Completion' AGENTS.md
 require 'One issue maps to one branch and one pull request.' AGENTS.md
 require 'Use test-driven development for behavior changes.' AGENTS.md
+require '## Worktree isolation' AGENTS.md
+require 'Perform issue implementation in an isolated worktree at project-local `.worktrees/issue-<number>-<slug>`.' AGENTS.md
+require 'Detect whether the host already provides an isolated worktree before creating one; do not create nested worktrees in a host-managed worktree.' AGENTS.md
+require 'Verify the project-local `.worktrees/` path is ignored before creating the worktree.' AGENTS.md
+require 'If the sandbox explicitly blocks creation, document the fallback in the issue work log (or PR work log once it exists), including the blocker, actual isolation boundary, and why it is safe to proceed.' AGENTS.md
+require 'Before a draft PR exists, after branch creation and baseline verification, post a structured work log with the objective, scope, and baseline result to the GitHub issue.' AGENTS.md
+require 'After the first valid checkpoint, open a draft PR, copy the work log into it, and keep the PR work log current.' AGENTS.md
 
 require 'Dependencies and prerequisites' .github/ISSUE_TEMPLATE/implementation.yml
 require 'Acceptance criteria' .github/ISSUE_TEMPLATE/implementation.yml
@@ -48,10 +55,13 @@ require '# GitHub Project Configuration' docs/project-management.md
 require 'AI-Codium Development' docs/project-management.md
 require '## Branch and pull-request policy' docs/project-management.md
 require 'Open a draft pull request after the first tested checkpoint.' docs/project-management.md
+require 'Before a draft PR exists, record the structured work log on the GitHub issue after branch creation and baseline verification.' docs/project-management.md
+require 'After the first valid checkpoint, open the draft PR, copy the work log into it, and keep it current there.' docs/project-management.md
 
 require 'AI-only development workflow' CONTRIBUTING.md
 require 'AGENTS.md' CONTRIBUTING.md
 require 'VSCodium' CONTRIBUTING.md
+require 'AI-Codium preserves the MIT License and its upstream relationship with `VSCodium/vscodium`.' CONTRIBUTING.md
 
 require '## Session continuity' docs/agent/PROJECT_STATUS.md
 require '### Start or resume' docs/agent/PROJECT_STATUS.md
@@ -63,5 +73,8 @@ require 'Keep the current branch recoverable, commit any independently valid tes
 require 'The handoff must name the current and last known-good commits, current failure or uncertainty, completed work, exact next command, and any required human decision.' docs/agent/PROJECT_STATUS.md
 require 'mark the issue `blocked` when external authority, credentials, licensing, security approval, or an upstream dependency is required.' docs/agent/PROJECT_STATUS.md
 require 'then stop until the stated decision or dependency is resolved.' docs/agent/PROJECT_STATUS.md
+require 'Issue #10 governance is implemented and under review in draft PR #46.' docs/agent/PROJECT_STATUS.md
+require 'Issue #10 remains open until draft PR #46 is merged.' docs/agent/PROJECT_STATUS.md
+require 'Issue #11 becomes the next autonomous task only after issue #10 closes.' docs/agent/PROJECT_STATUS.md
 
 printf 'Governance contract: PASS\n'

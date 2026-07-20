@@ -8,8 +8,9 @@
 
 - The VSCodium fork exists at `mandosanti06/AI-codium`.
 - The product and architecture design is approved and committed.
-- AI-only governance and handoff protocols are being established.
-- No product implementation issue should begin before the M0 governance issue is closed.
+- Issue #10 governance is implemented and under review in draft PR #46.
+- Issue #10 remains open until draft PR #46 is merged.
+- No product implementation issue should begin before issue #10 is closed.
 
 ## Execution order
 
@@ -21,7 +22,7 @@
 
 ## Next AI-ready work
 
-Use the earliest open, dependency-free M0 child issue. Confirm its current status on GitHub before starting.
+Issue #11 becomes the next autonomous task only after issue #10 closes. Confirm its current status on GitHub before starting.
 
 ## Session continuity
 

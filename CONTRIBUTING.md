@@ -24,7 +24,7 @@ Every implementation task must begin from an `ai-ready` GitHub issue and follow 
 - When work cannot continue safely, follow the blocking and recovery procedure in `AGENTS.md`; record the exact blocker and required human decision rather than guessing.
 - Do not place credentials, private source, or unredacted provider data in repository artifacts, issues, pull requests, or handoffs.
 
-AI-Codium is derived from VSCodium. The VSCodium attribution and build references below remain useful for understanding the upstream project; AI-Codium-specific work follows the governance contract above.
+AI-Codium is derived from VSCodium. AI-Codium preserves the MIT License and its upstream relationship with `VSCodium/vscodium`. The VSCodium attribution and build references below remain useful for understanding the upstream project; AI-Codium-specific work follows the governance contract above.
 
 ## Reporting Bugs
 
