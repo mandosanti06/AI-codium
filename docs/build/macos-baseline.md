@@ -42,36 +42,44 @@ can reach GitHub, the VS Code update endpoint, and the npm registry.
 
 ## Local reproduction
 
-Run the following function once on an Apple Silicon macOS host with `arm64`, and once
-on an Intel macOS host with `x64`. It removes only generated directories in this
-repository before each architecture so the output is not reused.
+Run the following commands separately on each native host. Set `ARCH=arm64` on an
+Apple Silicon macOS host or `ARCH=x64` on an Intel macOS host. The commands reject an
+unsupported value or mismatched host, build only the selected architecture, and move
+its output to an architecture-specific destination.
 
 ```bash
-build_macos_baseline() {
-  local arch="$1"
+: "${ARCH:?Set ARCH to arm64 or x64}"
+case "$ARCH" in
+  arm64) expected_host=arm64 ;;
+  x64) expected_host=x86_64 ;;
+  *) printf 'Unsupported ARCH: %s (expected arm64 or x64)\n' "$ARCH" >&2; exit 1 ;;
+esac
 
-  rm -rf vscode VSCode-darwin-arm64 VSCode-darwin-x64 vscode-cli assets
-  export APP_NAME=VSCodium
-  export BINARY_NAME=codium
-  export CI_BUILD=no
-  export GH_REPO_PATH=VSCodium/vscodium
-  export ORG_NAME=VSCodium
-  export OS_NAME=osx
-  export SHOULD_BUILD=yes
-  export VSCODE_ARCH="$arch"
-  export VSCODE_QUALITY=stable
+host_arch="$(uname -m)"
+if [[ "$host_arch" != "$expected_host" ]]; then
+  printf 'ARCH=%s requires a %s host; this host is %s\n' \
+    "$ARCH" "$expected_host" "$host_arch" >&2
+  exit 1
+fi
 
-  . ./get_repo.sh
-  ./build.sh
-  ./prepare_assets.sh
-}
+rm -rf vscode VSCode-darwin-arm64 VSCode-darwin-x64 vscode-cli assets
+export APP_NAME=VSCodium
+export BINARY_NAME=codium
+export CI_BUILD=no
+export GH_REPO_PATH=VSCodium/vscodium
+export ORG_NAME=VSCodium
+export OS_NAME=osx
+export SHOULD_BUILD=yes
+export VSCODE_ARCH="$ARCH"
+export VSCODE_QUALITY=stable
 
-build_macos_baseline arm64
+. ./get_repo.sh
+./build.sh
+./prepare_assets.sh
+
 mkdir -p baseline-artifacts
-mv assets baseline-artifacts/arm64
-
-build_macos_baseline x64
-mv assets baseline-artifacts/x64
+rm -rf "baseline-artifacts/$ARCH"
+mv assets "baseline-artifacts/$ARCH"
 ```
 
 The focused build command is `./build.sh`. `get_repo.sh` must be sourced first because
