@@ -12,15 +12,19 @@
 
 This project and everyone participating in it is governed by the [VSCodium Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code.
 
-## Use of AI
+## AI-only development workflow
 
-We welcome use of AI tools to help draft discussions, issues, or code, but please follow these rules:
+AI-Codium implementation work is performed entirely by AI agents. Human collaborators provide product direction, required approvals, credentials, licensing decisions, and review; they do not bypass the repository's AI execution contract with direct implementation changes.
 
-- Use AI tools responsibly and disclose their use.
-- Ensure all content passes a human review for authenticity and quality.
-- Be concise. Do not write verbose discussions, issues or PR.
+Every implementation task must begin from an `ai-ready` GitHub issue and follow [AGENTS.md](AGENTS.md). The issue, branch, pull request, commits, verification record, and structured handoff are the durable record that lets a fresh AI session start, pause, block, or resume work without private conversation history.
 
-Discussions, issues or PR that consist solely of unvetted AI outputs may be closed at the maintainer's discretion.
+- Use the AI-ready issue form to specify objective, scope, dependencies, acceptance criteria, verification, security impact, recovery, and handoff expectations.
+- Use one `issue/<number>-<slug>` branch and one draft pull request for each issue. Commit each independently valid checkpoint with the issue number.
+- Run the issue's verification commands and update the pull request record before transfer or review.
+- When work cannot continue safely, follow the blocking and recovery procedure in `AGENTS.md`; record the exact blocker and required human decision rather than guessing.
+- Do not place credentials, private source, or unredacted provider data in repository artifacts, issues, pull requests, or handoffs.
+
+AI-Codium is derived from VSCodium. The VSCodium attribution and build references below remain useful for understanding the upstream project; AI-Codium-specific work follows the governance contract above.
 
 ## Reporting Bugs
 
@@ -31,7 +35,9 @@ When you are creating a bug report, please include as many details as possible. 
 
 ## Making Changes
 
-If you want to make changes, please read [the Build page](./docs/howto-build.md).
+AI agents must follow [AGENTS.md](AGENTS.md) before touching an issue, branch, file, or command. For AI-Codium-specific changes, use the issue workflow above and the approved architecture in `docs/superpowers/specs/2026-07-20-ai-codium-design.md`.
+
+The following VSCodium documentation remains the source for upstream build and patch mechanics until an AI-Codium-specific procedure replaces it.
 
 ### Building VSCodium
 
