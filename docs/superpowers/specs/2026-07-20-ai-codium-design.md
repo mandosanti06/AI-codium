@@ -1,6 +1,6 @@
 # AI-Codium Product and Architecture Design
 
-**Status:** Approved design awaiting publication to the AI-Codium fork  
+**Status:** Approved and published  
 **Date:** 2026-07-20  
 **Upstream:** `VSCodium/vscodium`  
 **Initial platform:** macOS 12 or newer, arm64 and x64  
