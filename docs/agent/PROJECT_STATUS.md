@@ -8,8 +8,9 @@
 
 - The VSCodium fork exists at `mandosanti06/AI-codium`.
 - The product and architecture design is approved and committed.
-- AI-only governance and handoff protocols are being established.
-- No product implementation issue should begin before the M0 governance issue is closed.
+- Issue #10 governance is implemented and under review in draft PR #46.
+- Issue #10 remains open until draft PR #46 is merged.
+- No product implementation issue should begin before issue #10 is closed.
 
 ## Execution order
 
@@ -21,7 +22,21 @@
 
 ## Next AI-ready work
 
-Use the earliest open, dependency-free M0 child issue. Confirm its current status on GitHub before starting.
+Issue #11 becomes the next autonomous task only after issue #10 closes. Confirm its current status on GitHub before starting.
+
+## Session continuity
+
+### Start or resume
+
+Read `AGENTS.md`, the approved design, this status file, the assigned issue and dependencies, and the current branch, pull request, checks, reviews, and latest handoff. Only begin an open issue marked `ai-ready` whose dependencies are closed. The issue and pull request provide the current objective, acceptance criteria, verification record, and active checkpoint.
+
+### Pause or transfer
+
+Keep the current branch recoverable, commit any independently valid tested step, and add the structured handoff from `docs/agent/HANDOFF_TEMPLATE.md` to the active draft pull request. The handoff must name the current and last known-good commits, current failure or uncertainty, completed work, exact next command, and any required human decision.
+
+### Blocked work
+
+Capture the smallest reproduction, attempt only documented safe recoveries, preserve useful work, and mark the issue `blocked` when external authority, credentials, licensing, security approval, or an upstream dependency is required. Link a narrowly scoped follow-up issue when the blocker belongs elsewhere, then stop until the stated decision or dependency is resolved.
 
 ## Known human-managed setup
 
@@ -32,4 +47,3 @@ Use the earliest open, dependency-free M0 child issue. Confirm its current statu
 ## Update rule
 
 Update this file only when a milestone changes, a global blocker appears or clears, or the next dependency-free work set changes. Do not duplicate per-issue progress here.
-

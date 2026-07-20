@@ -33,13 +33,21 @@ Conversation history is optional context and is never the source of truth.
 - If no issue is assigned, select the earliest dependency-free item listed in `docs/agent/PROJECT_STATUS.md`.
 - Issues marked `needs-human-decision`, `blocked`, `licensing-risk`, or `security-sensitive` require the approval stated in the issue before mutation begins.
 
+## Worktree isolation
+
+- Perform issue implementation in an isolated worktree at project-local `.worktrees/issue-<number>-<slug>`.
+- Detect whether the host already provides an isolated worktree before creating one; do not create nested worktrees in a host-managed worktree.
+- Verify the project-local `.worktrees/` path is ignored before creating the worktree.
+- If the sandbox explicitly blocks creation, document the fallback in the issue work log (or PR work log once it exists), including the blocker, actual isolation boundary, and why it is safe to proceed. Continue only when that fallback does not overlap active issue work; otherwise mark the issue blocked.
+
 ## Before editing
 
 1. Confirm the worktree and branch.
 2. Pull or fetch current remote state without discarding local changes.
 3. Reproduce the current baseline with the verification command from the issue.
-4. Post or update the PR work log with the objective, scope, and baseline result.
-5. Inspect overlapping active PRs. Do not modify the same subsystem concurrently without explicit coordination.
+4. Before a draft PR exists, after branch creation and baseline verification, post a structured work log with the objective, scope, and baseline result to the GitHub issue.
+5. After the first valid checkpoint, open a draft PR, copy the work log into it, and keep the PR work log current.
+6. Inspect overlapping active PRs. Do not modify the same subsystem concurrently without explicit coordination.
 
 ## Implementation rules
 
@@ -56,7 +64,7 @@ Conversation history is optional context and is never the source of truth.
 
 - Commit after each independently valid, tested step.
 - Commit messages use `<type>(<scope>): <summary> (#<issue>)`.
-- Push checkpoints to the issue branch and keep a draft PR open.
+- After the draft PR exists, push checkpoints to the issue branch and keep its work log current.
 - Do not knowingly leave the branch broken. If a session ends during a failing test cycle, identify the last known-good commit in the handoff.
 - A `WIP` commit is allowed only to preserve recoverable work. It must contain no secrets and the handoff must explain how to continue or revert it.
 
@@ -108,4 +116,3 @@ Before claiming completion:
 3. Inspect the final diff for secrets, generated artifacts, unrelated changes, and upstream-conflict risk.
 4. Update documentation, ADRs, and `docs/agent/PROJECT_STATUS.md` when milestone state changes.
 5. Record the verification evidence and remaining risks in the PR.
-

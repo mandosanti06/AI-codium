@@ -35,7 +35,9 @@ Create one user-owned GitHub Project named `AI-Codium Development` and use GitHu
 ## Branch and pull-request policy
 
 - One issue per branch using `issue/<number>-<slug>`.
+- Before a draft PR exists, record the structured work log on the GitHub issue after branch creation and baseline verification.
 - Open a draft pull request after the first tested checkpoint.
+- After the first valid checkpoint, open the draft PR, copy the work log into it, and keep it current there.
 - Require pull requests, passing CI, and resolved review threads before `master` changes.
 - Require linear history or squash merge for feature work.
 - Allow upstream-sync PRs to preserve traceable merge commits when necessary.
@@ -44,4 +46,3 @@ Create one user-owned GitHub Project named `AI-Codium Development` and use GitHu
 ## One-time manual setup
 
 The connected GitHub API used by the planning agent does not expose GitHub Projects or branch-protection mutations. A repository administrator must create the Project, fields, views, workflows, and protection rule described above. After the auto-add workflow is active, issue and PR lifecycle changes populate the board automatically.
-
