@@ -99,13 +99,80 @@ for file in \
   product/20-last.json product/10-first.json product/30-last.patch product/05-first.patch \
   platform/20-last.json platform/10-first.patch \
   workbench/10-first.json workbench/20-last.patch; do
-  : >"${fixture}/patches/aicodium/${file}"
+  if [[ "${file}" == *.json ]]; then
+    printf '[]\n' >"${fixture}/patches/aicodium/${file}"
+  else
+    : >"${fixture}/patches/aicodium/${file}"
+  fi
 done
 printf 'runtime payload\n' >"${fixture}/src/aicodium-runtime/vscode/runtime.txt"
 printf 'extension payload\n' >"${fixture}/src/aicodium-extension/vscode/extension.txt"
 
+# Both parser errors and unsupported action shapes must fail before the
+# upstream jq|while implementation can report a false success. The production
+# AI-Codium pipeline is exercised so this cannot pass by validating a helper
+# that is never invoked.
+malformed_action=${fixture}/patches/aicodium/product/00-malformed.json
+printf '[{"action":"remove","paths":' >"${malformed_action}"
+if validate_aicodium_actions "${malformed_action}"; then
+  fail 'malformed AI-Codium JSON was accepted by validation'
+fi
+if (
+  cd "${fixture}/vscode"
+  apply_aicodium_patches
+); then
+  fail 'malformed AI-Codium JSON silently succeeded during preparation'
+fi
+rm -f "${malformed_action}"
+
+invalid_action=${fixture}/patches/aicodium/product/00-invalid.json
+printf '[{"action":"copy","paths":[]}]\n' >"${invalid_action}"
+if validate_aicodium_actions "${invalid_action}"; then
+  fail 'unsupported AI-Codium action was accepted by validation'
+fi
+if (
+  cd "${fixture}/vscode"
+  apply_aicodium_patches
+); then
+  fail 'unsupported AI-Codium action silently succeeded during preparation'
+fi
+rm -f "${invalid_action}"
+
+escape_sentinel=${fixture}/escape/sentinel
+mkdir -p "${fixture}/escape"
+printf 'must remain\n' >"${escape_sentinel}"
+for escape_path in "../escape/sentinel" "${escape_sentinel}"; do
+  escape_action=${fixture}/patches/aicodium/product/00-path-escape.json
+  printf '[{"action":"remove","paths":["%s"]}]\n' "${escape_path}" >"${escape_action}"
+  if (
+    cd "${fixture}/vscode"
+    apply_aicodium_actions "../patches/aicodium/product/00-path-escape.json"
+  ); then
+    fail "AI-Codium action path escaped prepared vscode: ${escape_path}"
+  fi
+  [[ -e "${escape_sentinel}" ]] ||
+    fail "AI-Codium action removed a path outside prepared vscode: ${escape_path}"
+done
+rm -f "${escape_action}"
+
+safe_sentinel=${fixture}/vscode/safe-sentinel
+atomic_action=${fixture}/patches/aicodium/product/00-atomic-paths.json
+printf 'must remain\n' >"${safe_sentinel}"
+printf '[{"action":"remove","paths":["safe-sentinel","../escape/sentinel"]}]\n' >"${atomic_action}"
+if (
+  cd "${fixture}/vscode"
+  apply_aicodium_actions "../patches/aicodium/product/00-atomic-paths.json"
+); then
+  fail 'AI-Codium action accepted a mixed safe and escaping path set'
+fi
+[[ -e "${safe_sentinel}" ]] ||
+  fail 'AI-Codium action removed a safe path before rejecting a later escape'
+[[ -e "${escape_sentinel}" ]] ||
+  fail 'AI-Codium atomicity fixture lost its outside sentinel'
+rm -f "${atomic_action}"
+
 log=${tmp_dir}/order.log
-apply_actions() { printf 'action:%s\n' "${1#../patches/aicodium/}" >>"${log}"; }
+apply_aicodium_actions() { printf 'action:%s\n' "${1#../patches/aicodium/}" >>"${log}"; }
 apply_patch() { printf 'patch:%s\n' "${1#../patches/aicodium/}" >>"${log}"; }
 
 (
@@ -153,7 +220,7 @@ mkdir -p "${tmp_dir}/optional/src"
 
 # A failed patch must terminate the pipeline before later categories run.
 failure_log=${tmp_dir}/failure.log
-apply_actions() { printf 'action:%s\n' "$1" >>"${failure_log}"; }
+apply_aicodium_actions() { printf 'action:%s\n' "$1" >>"${failure_log}"; }
 apply_patch() {
   printf 'patch:%s\n' "$1" >>"${failure_log}"
   [[ "$1" != *product/05-first.patch ]]

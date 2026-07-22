@@ -17,6 +17,14 @@ Within each category, `*.json` action files are applied lexically first, then
 are not traversed implicitly; adding another category or depth requires an
 intentional preparation-pipeline change and test update.
 
+AI-Codium action files use an array of objects with `"action": "remove"` and a
+`paths` array of string paths. The complete file and every target are validated
+before any path is changed; each target must resolve physically beneath the
+prepared `vscode` root. Malformed JSON, unsupported actions, invalid path
+arrays, path escapes, or a failed removal stop preparation. This fail-closed
+handling is scoped to AI-Codium categories; upstream VSCodium action processing
+remains unchanged.
+
 ## Required ownership header
 
 Every patch must begin with comments recording:
