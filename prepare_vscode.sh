@@ -145,6 +145,169 @@ cat product.json
 # include common functions
 . ../utils.sh
 
+# AICODIUM_PIPELINE_FUNCTIONS_BEGIN
+apply_aicodium_patches() {
+  local category file
+  local LC_ALL=C
+  local -a categories=(product platform workbench)
+
+  for category in "${categories[@]}"; do
+    for file in "../patches/aicodium/${category}/"*.json; do
+      if [[ -f "${file}" ]]; then
+        apply_aicodium_actions "${file}" || return 1
+      fi
+    done
+
+    for file in "../patches/aicodium/${category}/"*.patch; do
+      if [[ -f "${file}" ]]; then
+        apply_patch "${file}" || return 1
+      fi
+    done
+  done
+}
+
+validate_aicodium_actions() {
+  local file=$1
+
+  if ! jq -e '
+    type == "array" and
+    all(.[];
+      type == "object" and
+      .action == "remove" and
+      (.paths | type == "array" and all(.[]; type == "string"))
+    )
+  ' "${file}" >/dev/null; then
+    echo "Invalid AI-Codium action file: ${file}" >&2
+    return 1
+  fi
+}
+
+resolve_aicodium_path() {
+  local entry_path=$1
+  local entry_parent entry_name
+
+  if [[ -d "${entry_path}" ]]; then
+    cd -- "${entry_path}" && pwd -P
+    return
+  fi
+
+  entry_parent=$(dirname -- "${entry_path}")
+  entry_name=$(basename -- "${entry_path}")
+  entry_parent=$(cd -- "${entry_parent}" && pwd -P) || return 1
+
+  case "${entry_name}" in
+    .)
+      printf '%s\n' "${entry_parent}"
+      ;;
+    ..)
+      cd -- "${entry_parent}/.." && pwd -P
+      ;;
+    *)
+      printf '%s/%s\n' "${entry_parent}" "${entry_name}"
+      ;;
+  esac
+}
+
+apply_aicodium_actions() {
+  local file=$1
+  local entry_path raw_paths prepared_root resolved_entry_path
+  local -a action_paths=()
+
+  validate_aicodium_actions "${file}" || return 1
+  prepared_root=$(pwd -P)
+
+  if ! raw_paths=$(jq -r '.[] | .paths[]' "${file}"); then
+    echo "Invalid AI-Codium action file: ${file}" >&2
+    return 1
+  fi
+
+  if [[ -z "${raw_paths}" ]]; then
+    return 0
+  fi
+
+  # Resolve and validate every target before changing any path. This keeps a
+  # later invalid or escaping target from leaving an earlier target removed.
+  while IFS= read -r entry_path; do
+    entry_path="${entry_path%$'\r'}"
+    action_paths+=("${entry_path}")
+
+    resolved_entry_path=$(resolve_aicodium_path "${entry_path}") || {
+      echo "Unable to resolve AI-Codium action path: ${entry_path}" >&2
+      return 1
+    }
+    case "${resolved_entry_path}/" in
+      "${prepared_root}/"*)
+        if [[ "${resolved_entry_path}" == "${prepared_root}" ]]; then
+          echo "AI-Codium action path resolves to prepared vscode root: ${entry_path}" >&2
+          return 1
+        fi
+        ;;
+      *)
+        echo "AI-Codium action path escapes prepared vscode: ${entry_path}" >&2
+        return 1
+        ;;
+    esac
+
+    if [[ ! -e "${entry_path}" ]]; then
+      echo "Not found: ${entry_path}" >&2
+      return 1
+    fi
+  done <<< "${raw_paths}"
+
+  for entry_path in "${action_paths[@]}"; do
+    if rm -rf -- "${entry_path}"; then
+      echo "Removed: ${entry_path}"
+    else
+      echo "Failed to remove: ${entry_path}" >&2
+      return 1
+    fi
+  done
+}
+
+copy_aicodium_source() {
+  local source_relative=$1
+  local destination_relative=$2
+  local prepared_root source_root destination_parent destination_root
+
+  prepared_root=$(pwd -P)
+  source_root="${prepared_root}/../${source_relative}"
+  if [[ ! -d "${source_root}" ]]; then
+    return 0
+  fi
+
+  destination_parent=$(dirname "${destination_relative}")
+  destination_parent=$(cd "${destination_parent}" && pwd -P) || return
+  case "${destination_parent}/" in
+    "${prepared_root}/"*) ;;
+    *)
+      echo "AI-Codium source destination parent escapes prepared vscode: ${destination_relative}" >&2
+      return 1
+      ;;
+  esac
+
+  mkdir -p "${destination_relative}" || return
+  destination_root=$(cd "${destination_relative}" && pwd -P) || return
+  case "${destination_root}/" in
+    "${prepared_root}/"*) ;;
+    *)
+      echo "AI-Codium source destination escapes prepared vscode: ${destination_relative}" >&2
+      return 1
+      ;;
+  esac
+
+  cp -Rp "${source_root}/." "${destination_root}/" || return
+}
+
+copy_aicodium_sources() {
+  copy_aicodium_source \
+    "src/aicodium-runtime/vscode" \
+    "src/vs/platform/aicodiumRuntime" || return
+  copy_aicodium_source \
+    "src/aicodium-extension/vscode" \
+    "extensions/aicodium" || return
+}
+# AICODIUM_PIPELINE_FUNCTIONS_END
+
 # {{{ apply patches
 
 echo "APP_NAME=\"${APP_NAME}\""
@@ -193,7 +356,18 @@ for file in ../patches/user/*.patch; do
     apply_patch "${file}"
   fi
 done
+
+# AICODIUM_PIPELINE_BEGIN
+# Upstream actions and patches above always run before product, platform, and
+# workbench AI-Codium categories.
+apply_aicodium_patches
+# AICODIUM_PIPELINE_END
 # }}}
+
+# AICODIUM_SOURCE_COPY_BEGIN
+# Repository README files sit outside each explicit vscode/ payload boundary.
+copy_aicodium_sources
+# AICODIUM_SOURCE_COPY_END
 
 set -x
 
